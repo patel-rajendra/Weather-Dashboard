@@ -57,9 +57,9 @@ function searchCurrentWeather(city){
         $("#city-card").show();
         
         $("#temperature").text("Temperature : "+tempF.toFixed(2)+" °F/ "+tempC.toFixed(2)+"°C"); //SHIFT OPTION 8 for degree symbol
-        $("#humidity").text("Humidity : "+response.main.humidity+" %");
         $("#windspeed").text("Wind Speed : "+response.wind.speed+" MPH");
-
+        $("#humidity").text("Humidity : "+response.main.humidity+" %");
+        
         var imageIcon = $("<img>").attr("src", "https://openweathermap.org/img/wn/" + response.weather[0].icon.toString() + ".png");
 
         $("#city-name").text(response.name + " ("+currentDate+") ").append(imageIcon);
@@ -69,8 +69,55 @@ function searchCurrentWeather(city){
         showForecast(forecastQueryURL);
         
     });   
-
 }
+
+//function to get UV index
+function getUVIndex(uvQueryURL){
+
+    console.log("UV query URL : "+uvQueryURL);
+    
+    fetch(uvQueryURL)
+        .then(function (response) {
+          return response.json();
+        }).then(function(uvResponse){
+    
+        var uvValue = uvResponse.value;
+        
+        var uvButton = $("<button>").attr("type","button").text(uvValue);
+ 
+        if(uvValue >= 0 && uvValue <= 3){
+            
+            //low : green
+            $("#uvindex").text("UV Index: Low, ").append(uvButton);
+            uvButton.addClass("btn bg-success");
+        }
+        else if(uvValue >= 3 && uvValue <= 6){
+            
+            //moderate : yellow
+            $("#uvindex").text("UV Index: Moderate, ").append(uvButton);
+            uvButton.addClass("btn yellowBtn");
+        } 
+        else if(uvValue >= 6 && uvValue <= 8){
+            
+            //high : orange
+            $("#uvindex").text("UV Index: High, ").append(uvButton);
+            uvButton.addClass("btn orangeBtn");
+        }
+        else if(uvValue >= 8 && uvValue <= 10){
+            
+            //very high : red
+            $("#uvindex").text("UV Index: Very high, ").append(uvButton);
+            uvButton.addClass("btn bg-danger");
+        }
+        else if(uvValue >= 10){
+            
+            //extreme : violet
+            $("#uvindex").text("UV Index: Extreme, ").append(uvButton);
+            uvButton.addClass("btn violetBtn");
+        }
+    });
+}
+
 
 // Starting Execute the script 
 $(function(){
