@@ -83,41 +83,139 @@ function getUVIndex(uvQueryURL){
     
         var uvValue = uvResponse.value;
         
-        var uvButton = $("<button>").attr("type","button").text(uvValue);
+        var uvIndex = $("<button>").attr("type","button").text(uvValue);
  
         if(uvValue >= 0 && uvValue <= 3){
             
             //low : green
-            $("#uvindex").text("UV Index: Low, ").append(uvButton);
-            uvButton.addClass("btn bg-success");
+            $("#uvindex").text("UV Index: Low, ").append(uvIndex);
+            uvIndex.addClass("btn bg-success");
         }
         else if(uvValue >= 3 && uvValue <= 6){
             
             //moderate : yellow
-            $("#uvindex").text("UV Index: Moderate, ").append(uvButton);
-            uvButton.addClass("btn yellowBtn");
+            $("#uvindex").text("UV Index: Moderate, ").append(uvIndex);
+            uvIndex.addClass("btn yellowBtn");
         } 
         else if(uvValue >= 6 && uvValue <= 8){
             
             //high : orange
-            $("#uvindex").text("UV Index: High, ").append(uvButton);
-            uvButton.addClass("btn orangeBtn");
+            $("#uvindex").text("UV Index: High, ").append(uvIndex);
+            uvIndex.addClass("btn orangeBtn");
         }
         else if(uvValue >= 8 && uvValue <= 10){
             
             //very high : red
-            $("#uvindex").text("UV Index: Very high, ").append(uvButton);
-            uvButton.addClass("btn bg-danger");
+            $("#uvindex").text("UV Index: Very high, ").append(uvIndex);
+            uvIndex.addClass("btn bg-danger");
         }
         else if(uvValue >= 10){
             
             //extreme : violet
-            $("#uvindex").text("UV Index: Extreme, ").append(uvButton);
-            uvButton.addClass("btn violetBtn");
+            $("#uvindex").text("UV Index: Extreme, ").append(uvIndex);
+            uvIndex.addClass("btn violetBtn");
         }
     });
 }
 
+//function to show 5 days forecast 
+function showForecast(forecastQueryURL){
+
+    // api.openweathermap.org/data/2.5/forecast?id={city ID}&cnt=5&units=imperial&appid={your api key}
+    var temp, humidity,icon;
+
+    console.log("Forecast query URL : "+forecastQueryURL);
+    $("#5DayForecast").show();
+
+    fetch(forecastQueryURL)
+        .then(function (response) {
+          return response.json();
+        }).then(function(forecastResponse){
+            console.log(forecastQueryURL);
+        $("#forecast").empty();
+
+        var list = forecastResponse.list;
+
+        for(var i = 0 ; i < list.length ;i++){
+            
+            var date = list[i].dt_txt.split(" ")[0];
+            var dateArr = date.split("-");
+            
+            var dateForecast = dateArr[1]+"/"+dateArr[2]+"/"+dateArr[0];
+            var time = list[i].dt_txt.split(" ")[1];
+
+            // console.log("date : "+dateForecast+" time : "+time);
+
+            if(time === "12:00:00"){
+
+                temp = list[i].main.temp;
+                humidity = list[i].main.humidity;
+                wind = list[i].wind.speed;
+                icon = list[i].weather[0].icon;
+
+                var card = $("<div>").addClass("card bg-secondary text-white");
+                var cardBody = $("<div>").addClass("card-body");
+                
+                var fDate = $("<h5>").addClass("card-text").text(dateForecast);
+                
+                // https://openweathermap.org/img/wn/10d.png
+                var imgIcon = $("<img>").attr("src","https://openweathermap.org/img/wn/" + icon + ".png"); 
+                
+                var tempP  = $("<p>").addClass("card-text").text("Temp: "+temp+"°F");
+                
+                var humidityP = $("<p>").addClass("card-text").text("Humidity : "+humidity+" % ");
+
+                var windP = $("<p>").addClass("card-text").text("Wind : "+wind+" MPH ");
+
+                cardBody.append(fDate, imgIcon, tempP, humidityP,windP);
+                card.append(cardBody);
+
+                $("#forecast").append(card);
+            }
+       
+        }
+    });
+}
+
+// function to store and populate search history
+function populateSearchHistory(city){
+
+    var history = JSON.parse(localStorage.getItem("history"));  
+    var listitem;
+
+    // If exists 
+    if(history){
+
+        for(var i = 0 ; i < history.length; i++){
+            
+            if(history[i] === city){
+                return;
+            }         
+        } 
+        history.unshift(city); 
+        listitem = $("<li>").addClass("list-group-item previousCity").text(city);
+        $("#historylist").prepend(listitem);    
+    }
+    else{
+            history = [city]; 
+            
+            listitem = $("<li>").addClass("list-group-item previousCity").text(city);
+            $("#historylist").append(listitem);
+
+    }
+
+    localStorage.setItem("history", JSON.stringify(history));   
+}
+
+// onclick function on search history city to load weather of that city 
+$("#historylist").on("click", "li", function(event){
+
+    var previousCityName = $(this).text();
+    console.log("Previous city : "+ previousCityName);
+
+    searchCurrentWeather(previousCityName);
+
+});
 
 // Starting Execute the script 
 $(function(){
