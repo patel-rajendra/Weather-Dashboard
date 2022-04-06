@@ -56,7 +56,7 @@ function searchCurrentWeather(city){
           
         $("#city-card").show();
         
-        $("#temperature").text("Temperature : "+tempF.toFixed(2)+" °F/ "+tempC.toFixed(2)+"°C"); //SHIFT OPTION 8 for degree symbol
+        $("#temperature").text("Temperature : "+tempF.toFixed(2)+" °F/ "+tempC.toFixed(2)+"°C"); 
         $("#windspeed").text("Wind Speed : "+response.wind.speed+" MPH");
         $("#humidity").text("Humidity : "+response.main.humidity+" %");
         
